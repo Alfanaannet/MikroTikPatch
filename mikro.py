@@ -44,6 +44,26 @@ def mikro_softwareid_encode(id:int)->str:
       ret += '-'
   return ret
 
+def mikro_systemid_decode(system_id: str) -> int:
+    assert (isinstance(system_id, str))
+    ret = 0
+    for i in reversed(range(len(system_id))):
+        ret *= len(SYSTEM_ID_CHARACTER_TABLE)
+        ret += SYSTEM_ID_CHARACTER_TABLE.index(ord(system_id[i]))
+    return ret
+
+
+def mikro_systemid_encode(id: int) -> str:
+    assert (isinstance(id, int))
+    ret = ''
+    for i in range(11):
+        ret += chr(SYSTEM_ID_CHARACTER_TABLE[id %
+                   len(SYSTEM_ID_CHARACTER_TABLE)])
+        id //= len(SYSTEM_ID_CHARACTER_TABLE)
+    return ret
+
+
+
 def to32bits(v):
   return (v + (1 << 32)) % (1 << 32)
 
