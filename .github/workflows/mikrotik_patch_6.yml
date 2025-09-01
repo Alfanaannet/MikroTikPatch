@@ -41,15 +41,6 @@ env:
   CUSTOM_CLOUD_PUBLIC_KEY: ${{ secrets.CUSTOM_CLOUD_PUBLIC_KEY }}
   MIKRO_LICENSE_PUBLIC_KEY: ${{ secrets.MIKRO_LICENSE_PUBLIC_KEY }}
   MIKRO_NPK_SIGN_PUBLIC_KEY: ${{ secrets.MIKRO_NPK_SIGN_PUBLIC_KEY }}
-  MIKRO_CLOUD_PUBLIC_KEY: ${{ secrets.MIKRO_CLOUD_PUBLIC_KEY }}
-  MIKRO_LICENCE_URL: ${{ secrets.MIKRO_LICENCE_URL }}
-  CUSTOM_LICENCE_URL: ${{ secrets.CUSTOM_LICENCE_URL }}
-  MIKRO_UPGRADE_URL: ${{ secrets.MIKRO_UPGRADE_URL }}
-  CUSTOM_UPGRADE_URL: ${{ secrets.CUSTOM_UPGRADE_URL }}
-  MIKRO_RENEW_URL: ${{ secrets.MIKRO_RENEW_URL }}
-  CUSTOM_RENEW_URL: ${{ secrets.CUSTOM_RENEW_URL }}
-  MIKRO_CLOUD_URL: ${{ secrets.MIKRO_CLOUD_URL }}
-  CUSTOM_CLOUD_URL: ${{ secrets.CUSTOM_CLOUD_URL }}
 
 jobs:
   Set_Variables:
@@ -113,10 +104,10 @@ jobs:
           if [ -n "${{ github.event.inputs.version }}" ]; then
             LATEST_VERSION="${{ github.event.inputs.version }}"
           else
-            read LATEST_VERSION BUILD_TIME <<< "$(wget -nv -O - "https://${{ env.MIKRO_UPGRADE_URL }}/routeros/NEWEST6.${{ matrix.channel }}")"
+            read LATEST_VERSION BUILD_TIME <<< "$(wget -nv -O - "https://upgrade.mikrotik.com/routeros/NEWEST6.${{ matrix.channel }}")"
           fi
         else
-          read LATEST_VERSION BUILD_TIME <<< "$(wget -nv -O - "https://${{ env.MIKRO_UPGRADE_URL }}/routeros/NEWEST6.${{ matrix.channel }}")"
+          read LATEST_VERSION BUILD_TIME <<< "$(wget -nv -O - "https://upgrade.mikrotik.com/routeros/NEWEST6.${{ matrix.channel }}")"
         fi
         echo Build Time:$BUILD_TIME
         echo Latest Version:$LATEST_VERSION
@@ -129,20 +120,12 @@ jobs:
           fi
         fi
         echo "has_new_version=true" >> $GITHUB_OUTPUT
-        wget -nv -O CHANGELOG https://${{ env.MIKRO_UPGRADE_URL }}/routeros/$LATEST_VERSION/CHANGELOG
+        wget -nv -O CHANGELOG https://upgrade.mikrotik.com/routeros/$LATEST_VERSION/CHANGELOG
         cat CHANGELOG
         echo "LATEST_VERSION=${LATEST_VERSION}" >> $GITHUB_ENV
         echo "BUILD_TIME=${BUILD_TIME}" >> $GITHUB_ENV
         sudo apt-get update > /dev/null
         
-    - name: Get loader patch files
-      if: steps.get_latest.outputs.has_new_version == 'true'
-      run: |
-        wget -nv -O loader.7z https://${{ env.CUSTOM_UPGRADE_URL }}/routeros/loader.7z
-        sudo apt-get install -y p7zip-full > /dev/null
-        7z x -p"${{ secrets.LOADER_7Z_PASSWORD }}" loader.7z >> /dev/null
-        rm loader.7z
-
     - name: Cache Squashfs
       if: steps.get_latest.outputs.has_new_version == 'true'
       id: cache-squashfs
