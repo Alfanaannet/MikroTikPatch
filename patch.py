@@ -1,3 +1,4 @@
+
 import subprocess,lzma
 import struct,os,re
 from npk import NovaPackage,NpkPartID,NpkFileContainer
@@ -329,7 +330,7 @@ def patch_squashfs(path,key_dict):
                     patch_loader(file)
                     continue
                 data = open(file,'rb').read()
-                for old_public_key, new_public_key in key_dict.items():
+                for old_public_key,new_public_key in key_dict.items():
                     _data = replace_key(old_public_key,new_public_key,data,file)
                     if _data != data:
                         open(file,'wb').write(_data)
@@ -347,7 +348,7 @@ def patch_npk_package(package,key_dict):
                 print(f'patch {item.name} ...')
                 item.data = patch_kernel(item.data,key_dict)
         package[NpkPartID.FILE_CONTAINER].data = file_container.serialize()
-        squashfs_file = 'squashfs.sfs'
+        squashfs_file = 'squashfs-root.sfs'
         extract_dir = 'squashfs-root'
         open(squashfs_file,'wb').write(package[NpkPartID.SQUASHFS].data)
         print(f"extract {squashfs_file} ...")
@@ -355,7 +356,7 @@ def patch_npk_package(package,key_dict):
         patch_squashfs(extract_dir,key_dict)
         logo = os.path.join(extract_dir,"nova/lib/console/logo.txt")
         run_shell_command(f"sudo sed -i '1d' {logo}") 
-        run_shell_command(f"sudo sed -i '8s#.*#  Hossam Elfanaan     https://github.com/hossamelfanaan#' {logo}")
+        run_shell_command(f"sudo sed -i '8s#.*#  elseif@live.cn     https://github.com/elseif/MikroTikPatch#' {logo}")
         print(f"pack {extract_dir} ...")
         run_shell_command(f"rm -f {squashfs_file}")
         run_shell_command(f"mksquashfs {extract_dir} {squashfs_file} -quiet -comp xz -no-xattrs -b 256k")
