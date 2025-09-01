@@ -347,7 +347,7 @@ def patch_npk_package(package,key_dict):
                 print(f'patch {item.name} ...')
                 item.data = patch_kernel(item.data,key_dict)
         package[NpkPartID.FILE_CONTAINER].data = file_container.serialize()
-        squashfs_file = 'squashfs-root.sfs'
+        squashfs_file = 'squashfs.sfs'
         extract_dir = 'squashfs-root'
         open(squashfs_file,'wb').write(package[NpkPartID.SQUASHFS].data)
         print(f"extract {squashfs_file} ...")
