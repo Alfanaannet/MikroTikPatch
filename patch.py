@@ -320,19 +320,21 @@ def patch_loader(loader_file):
         print(e)
         print("loader module import failed. cannot run patch_loader.py")
         
-def patch_squashfs(path, key_dict):
+def patch_squashfs(path,key_dict):
     for root, dirs, files in os.walk(path):
-        for file in files:
-            file = os.path.join(root, file)
+        for _file in files:
+            file = os.path.join(root,_file)
             if os.path.isfile(file):
-                data = open(file, 'rb').read()
+                if _file =='loader':
+                    patch_loader(file)
+                    continue
+                data = open(file,'rb').read()
                 for old_public_key, new_public_key in key_dict.items():
-                    if old_public_key in data:
-                        print(f'{file} public key patched {old_public_key[:16].hex().upper()}...')
-                        data = data.replace(old_public_key, new_public_key)
-                        open(file, 'wb').write(data)
+                    _data = replace_key(old_public_key,new_public_key,data,file)
+                    if _data != data:
+                        open(file,'wb').write(_data)
+                data = open(file,'rb').read()
 
-            
 def run_shell_command(command):
     process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return process.stdout, process.stderr
