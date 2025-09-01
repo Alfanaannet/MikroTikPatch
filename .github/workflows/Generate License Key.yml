@@ -6,7 +6,10 @@ on:
       license_key:
         description: 'Input license key (e.g., SGPJ-7SKL)'
         required: true
-        default: ''
+      license_type:
+        description: 'License type (ros or chr)'
+        required: true
+        default: 'ros'
 
 permissions:
   contents: write
@@ -27,8 +30,12 @@ jobs:
     - name: Generate License
       id: generate_license
       run: |
-        python3 license.py licgenros ${{ github.event.inputs.license_key }} ${{ secrets.CUSTOM_LICENSE_PRIVATE_KEY }} > ${{ github.event.inputs.license_key }}.key
-
+        if [ "${{ github.event.inputs.license_type }}" = "chr" ]; then
+          python3 license.py licgenchr "${{ github.event.inputs.license_key }}" "${{ secrets.CUSTOM_LICENSE_PRIVATE_KEY }}" > "${{ github.event.inputs.license_key }}.key"
+        else
+          python3 license.py licgenros "${{ github.event.inputs.license_key }}" "${{ secrets.CUSTOM_LICENSE_PRIVATE_KEY }}" > "${{ github.event.inputs.license_key }}.key"
+        fi
+        
     - name: Ensure License Keys Directory Exists
       run: |
         mkdir -p "License Keys"
